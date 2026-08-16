@@ -3,156 +3,304 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>{{ brand }} — camp WiFi</title>
+<meta name="theme-color" content="#0A0713" />
+<title>{{ brand }} — camp internet</title>
 <style>
+  /* No webfonts by necessity: a captive portal is served to a device with no
+     internet, so a font CDN would silently fall back. The identity is carried
+     by inline SVG, colour and light instead. */
   :root{
-    --ground:#FBFAF7; --card:#FFFFFF; --ink:#0B2220; --ink-2:#42605C;
-    --rule:#DFE7E4; --accent:#0E9E8C; --accent-deep:#0A6F62; --accent-wash:#E3F6F2;
-    --gram:#D9436F; --warn:#8A5A00; --warn-bg:#FFF4DC;
-    --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
-    --mono:ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,monospace;
+    --void:#0A0713;         /* violet-black ground */
+    --veil:#140C24;         /* panel */
+    --veil-2:#1B1030;
+    --aqua:#38F0DC;
+    --green:#6FE97F;
+    --violet:#A855F7;
+    --bone:#CFC9BC;         /* neutral border */
+    --bone-dim:#6E6A61;
+    --text:#EDEAF6;
+    --text-dim:#A79FC0;
+    --sans:ui-rounded,'SF Pro Rounded','Segoe UI Variable Display','Segoe UI',
+           system-ui,-apple-system,sans-serif;
+    --mono:ui-monospace,SFMono-Regular,'SF Mono','Cascadia Mono',Menlo,Consolas,monospace;
   }
   *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
   body{
-    margin:0;background:var(--ground);color:var(--ink);font-family:var(--sans);
-    line-height:1.55;-webkit-font-smoothing:antialiased;
+    margin:0;background:var(--void);color:var(--text);font-family:var(--sans);
+    line-height:1.55;-webkit-font-smoothing:antialiased;overflow-x:hidden;
     padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
   }
-  .wrap{max-width:34rem;margin:0 auto;padding:2rem 1.15rem 3rem}
-  header{text-align:center;margin-bottom:1.75rem}
-  .mark{
-    display:inline-flex;align-items:baseline;gap:.1em;
-    font-size:clamp(2.6rem,12vw,3.6rem);font-weight:800;letter-spacing:-.035em;
-    line-height:1;margin:0;
+  /* the emanation: light bleeding up from the centre of the field */
+  body::before{
+    content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+    background:
+      radial-gradient(58rem 40rem at 50% -6rem, rgba(168,85,247,.30), transparent 62%),
+      radial-gradient(40rem 30rem at 50% 2rem, rgba(56,240,220,.16), transparent 60%),
+      radial-gradient(50rem 40rem at 50% 108%, rgba(111,233,127,.12), transparent 62%);
   }
-  .mark .a{color:var(--ink)} .mark .b{color:var(--accent)}
-  .bars{display:inline-flex;align-items:flex-end;gap:3px;margin-left:.45rem;height:.85em}
-  .bars i{display:block;width:6px;border-radius:2px;background:var(--accent);opacity:.28}
-  .bars i:nth-child(1){height:32%} .bars i:nth-child(2){height:58%}
-  .bars i:nth-child(3){height:80%} .bars i:nth-child(4){height:100%}
-  .bars i.on{opacity:1}
-  .tagline{
-    font-family:var(--mono);font-size:.7rem;letter-spacing:.19em;text-transform:uppercase;
-    color:var(--ink-2);margin:.85rem 0 0;
+  .field{position:relative;z-index:1;max-width:33rem;margin:0 auto;padding:1.25rem 1rem 3rem}
+
+  /* ── the emanation mark ──────────────────────────────────────────── */
+  .mark{text-align:center;padding:.25rem 0 .5rem}
+  .mark svg{width:min(23rem,92vw);height:auto;display:inline-block}
+  .wordmark{
+    font-family:var(--sans);font-weight:800;font-size:3.1rem;letter-spacing:-.045em;
+    margin:-1.1rem 0 0;line-height:1;position:relative;
   }
-  .lede{margin:1.25rem 0 0;color:var(--ink-2);font-size:1.02rem}
-  .banner{
-    background:var(--warn-bg);color:var(--warn);border-radius:10px;padding:.7rem .9rem;
-    font-size:.82rem;margin:0 0 1.25rem;text-align:center;font-weight:600;
+  .wordmark .w{color:var(--text)}
+  .wordmark .f{
+    background:linear-gradient(96deg,var(--aqua),var(--green) 45%,var(--violet));
+    -webkit-background-clip:text;background-clip:text;color:transparent;
   }
-  .err{background:#FDECEC;color:#96261D}
-  form.plans{display:flex;flex-direction:column;gap:.85rem;margin:0 0 1.5rem}
-  .plan{
-    display:block;background:var(--card);border:2px solid var(--rule);border-radius:14px;
-    padding:1rem 1.1rem;cursor:pointer;transition:border-color .12s,background .12s;
+  .wordmark::after{               /* the halo, not a drop shadow */
+    content:"";position:absolute;left:50%;top:52%;translate:-50% -50%;
+    width:13rem;height:5rem;border-radius:50%;z-index:-1;
+    background:radial-gradient(closest-side,rgba(56,240,220,.34),transparent 70%);
+    filter:blur(14px);
   }
-  .plan:hover{border-color:var(--accent)}
-  .plan input{position:absolute;opacity:0;pointer-events:none}
-  .plan:has(input:checked){border-color:var(--accent);background:var(--accent-wash)}
-  .plan:has(input:focus-visible){outline:3px solid var(--accent-deep);outline-offset:2px}
-  .plan-top{display:flex;justify-content:space-between;align-items:baseline;gap:1rem}
-  .plan-name{font-weight:750;font-size:1.15rem}
-  .price{font-weight:800;font-size:1.35rem;font-variant-numeric:tabular-nums;color:var(--accent-deep)}
-  .blurb{color:var(--ink-2);font-size:.92rem;margin:.15rem 0 .55rem}
-  .specs{display:flex;flex-wrap:wrap;gap:.4rem}
-  .spec{
-    font-family:var(--mono);font-size:.68rem;letter-spacing:.05em;background:var(--ground);
-    border:1px solid var(--rule);border-radius:5px;padding:.2em .5em;color:var(--ink-2);
+  .credit{
+    font-family:var(--mono);font-size:.62rem;letter-spacing:.3em;text-transform:uppercase;
+    color:var(--text-dim);margin:.85rem 0 0;
   }
-  .tos{display:flex;gap:.65rem;align-items:flex-start;font-size:.86rem;color:var(--ink-2);margin:0 0 1.1rem}
-  .tos input{width:1.3rem;height:1.3rem;flex:none;margin-top:.1rem;accent-color:var(--accent)}
-  button.buy{
-    width:100%;border:none;border-radius:12px;background:var(--accent);color:#fff;
-    font-family:inherit;font-size:1.1rem;font-weight:750;padding:1.05rem 1rem;cursor:pointer;
-    transition:background .12s;
+
+  /* ── panels ──────────────────────────────────────────────────────── */
+  .panel{
+    background:linear-gradient(180deg,rgba(27,16,48,.86),rgba(20,12,36,.86));
+    border:1px solid rgba(207,201,188,.22);       /* neutral border */
+    border-radius:14px;padding:1.15rem 1rem;margin:1.4rem 0 0;
+    backdrop-filter:blur(6px);
   }
-  button.buy:hover{background:var(--accent-deep)}
-  button.buy:focus-visible{outline:3px solid var(--accent-deep);outline-offset:3px}
-  button.buy:disabled{background:#B9C7C4;cursor:not-allowed}
-  .note{font-size:.8rem;color:var(--ink-2);text-align:center;margin:.85rem 0 0}
-  details{margin-top:2rem;border-top:1px solid var(--rule);padding-top:1.25rem}
-  summary{cursor:pointer;font-weight:650;font-size:.95rem}
-  details form{display:flex;gap:.5rem;margin-top:.85rem}
+  .panel-head{
+    display:flex;justify-content:space-between;align-items:baseline;gap:.75rem;
+    font-family:var(--mono);font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;
+    color:var(--text-dim);margin:0 0 .85rem;
+  }
+
+  .notice{
+    font-family:var(--mono);font-size:.72rem;line-height:1.55;text-align:center;
+    padding:.65rem .7rem;margin:0 0 .9rem;border-radius:9px;
+    border:1px solid rgba(56,240,220,.4);background:rgba(56,240,220,.08);color:var(--aqua);
+  }
+  .notice.warn{border-color:rgba(168,85,247,.45);background:rgba(168,85,247,.10);color:#D9B4FF}
+
+  /* ── passes ──────────────────────────────────────────────────────── */
+  .tiers{display:flex;flex-direction:column;gap:.6rem}
+  .tier{
+    display:grid;grid-template-columns:auto 1fr auto;gap:.8rem;align-items:center;
+    padding:.9rem .9rem;border-radius:11px;cursor:pointer;
+    border:1px solid rgba(207,201,188,.2);background:rgba(10,7,19,.5);
+    transition:border-color .15s,background .15s;
+  }
+  .tier input{position:absolute;opacity:0;width:0;height:0}
+  .orb{
+    width:1.15rem;height:1.15rem;border-radius:50%;flex:none;
+    border:1.5px solid var(--bone-dim);display:grid;place-items:center;
+  }
+  .orb::after{
+    content:"";width:.58rem;height:.58rem;border-radius:50%;transform:scale(0);
+    background:linear-gradient(140deg,var(--aqua),var(--green));transition:transform .15s;
+  }
+  .tier:hover{border-color:rgba(207,201,188,.45)}
+  .tier:has(input:checked){
+    border-color:var(--aqua);background:rgba(56,240,220,.09);
+    box-shadow:0 0 0 1px rgba(56,240,220,.35), 0 0 26px -6px rgba(56,240,220,.5);
+  }
+  .tier:has(input:checked) .orb{border-color:var(--aqua)}
+  .tier:has(input:checked) .orb::after{transform:scale(1)}
+  .tier:has(input:focus-visible){outline:2px solid var(--violet);outline-offset:2px}
+  .tier-name{font-weight:750;font-size:1.05rem;letter-spacing:-.01em}
+  .tier-spec{
+    font-family:var(--mono);font-size:.65rem;color:var(--text-dim);
+    letter-spacing:.04em;margin-top:.15rem;
+  }
+  .tier-price{
+    font-family:var(--mono);font-weight:700;font-size:1.14rem;
+    font-variant-numeric:tabular-nums;letter-spacing:-.02em;
+  }
+  .tier:has(input:checked) .tier-price{color:var(--aqua)}
+
+  .agree{
+    display:flex;gap:.6rem;align-items:flex-start;margin:1rem 0 0;
+    font-size:.8rem;color:var(--text-dim);line-height:1.5;
+  }
+  .agree input{width:1.2rem;height:1.2rem;flex:none;margin-top:.08rem;accent-color:var(--violet)}
+
+  .go{
+    display:block;width:100%;margin:1.05rem 0 0;border:none;border-radius:11px;
+    font-family:var(--sans);font-weight:800;font-size:1.08rem;padding:1.05rem 1rem;
+    color:#07121A;cursor:pointer;letter-spacing:.005em;
+    background:linear-gradient(96deg,var(--aqua),var(--green) 52%,#C9A8FF);
+    box-shadow:0 0 30px -8px rgba(56,240,220,.7);
+    transition:filter .15s,transform .1s;
+  }
+  .go:hover{filter:brightness(1.08)}
+  .go:active{transform:translateY(1px)}
+  .go:focus-visible{outline:3px solid var(--violet);outline-offset:3px}
+  .go:disabled{background:#2E2A3C;color:#78718E;box-shadow:none;cursor:not-allowed}
+  .fineprint{
+    font-family:var(--mono);font-size:.6rem;line-height:1.65;color:var(--text-dim);
+    text-align:center;margin:.7rem 0 0;
+  }
+
+  /* ── restore ─────────────────────────────────────────────────────── */
+  details summary{
+    font-family:var(--mono);font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;
+    cursor:pointer;color:var(--text-dim);list-style:none;
+  }
+  details summary::-webkit-details-marker{display:none}
+  details summary::before{content:"◇ ";color:var(--violet)}
+  details summary:hover{color:var(--text)}
+  details summary:focus-visible{outline:2px solid var(--violet);outline-offset:3px;border-radius:3px}
+  details form{display:flex;gap:.45rem;margin-top:.75rem}
   details input[type=text]{
-    flex:1;padding:.75rem .85rem;border:2px solid var(--rule);border-radius:10px;
-    font-family:var(--mono);font-size:1rem;text-transform:uppercase;background:var(--card);color:var(--ink);
+    flex:1;min-width:0;padding:.7rem .75rem;border-radius:9px;
+    border:1px solid rgba(207,201,188,.3);background:rgba(10,7,19,.6);color:var(--text);
+    font-family:var(--mono);font-size:1rem;text-transform:uppercase;letter-spacing:.08em;
   }
+  details input[type=text]:focus-visible{outline:2px solid var(--aqua);outline-offset:1px}
   details button{
-    border:none;background:var(--ink);color:#fff;border-radius:10px;padding:0 1.1rem;
-    font-weight:650;cursor:pointer;font-family:inherit;
+    border:1px solid rgba(207,201,188,.3);background:transparent;color:var(--text);
+    border-radius:9px;padding:0 1rem;font-family:var(--sans);font-weight:700;cursor:pointer;
   }
-  footer{margin-top:2.5rem;text-align:center;font-size:.78rem;color:var(--ink-2);line-height:1.7}
-  footer a{color:var(--gram);font-weight:650;text-decoration:none}
-  .mac{font-family:var(--mono);font-size:.7rem;color:#93A5A2;margin-top:.4rem}
-  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+  details button:hover{border-color:var(--aqua);color:var(--aqua)}
+  details button:focus-visible{outline:2px solid var(--aqua);outline-offset:2px}
+
+  .post{text-align:center;margin:1.6rem 0 0;font-size:.8rem;color:var(--text-dim);line-height:1.85}
+  .post a{
+    font-weight:700;text-decoration:none;
+    background:linear-gradient(96deg,var(--aqua),var(--violet));
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .post a:focus-visible{outline:2px solid var(--violet);outline-offset:3px;border-radius:3px}
+
+  /* the field breathing — one slow ambient pulse, nothing else moves */
+  #pulse{transform-origin:150px 150px;animation:breathe 7s ease-in-out infinite}
+  @keyframes breathe{
+    0%,100%{opacity:.55;transform:scale(.985)}
+    50%    {opacity:1;transform:scale(1.015)}
+  }
+  @media (prefers-reduced-motion:reduce){
+    #pulse{animation:none;opacity:.85}
+    *{transition:none!important}
+  }
 </style>
 </head>
 <body>
-<div class="wrap">
-  <header>
-    <h1 class="mark"><span class="a">Wee</span><span class="b">Fee</span><span class="bars"
-      aria-hidden="true"><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span></h1>
-    <p class="tagline">{{ tagline }}</p>
-    <p class="lede">Get online at camp. Pick a pass, pay, and you're connected in about a minute.</p>
-  </header>
+<div class="field">
 
-  {% if test_mode %}
-  <p class="banner">Test mode — no real card will be charged.</p>
-  {% endif %}
-  {% if cancelled %}
-  <p class="banner">Payment cancelled. Nothing was charged — pick a pass to try again.</p>
-  {% endif %}
-  {% if not mac %}
-  <p class="banner err">We can't see your device yet. Disconnect from the WiFi, rejoin
-  <strong>{{ brand }}</strong>, and open this page again from the sign-in prompt.</p>
-  {% endif %}
+  <div class="mark">
+    <!-- The signal drawn as an emanation: twelvefold symmetry, concentric
+         shells, luminous lattice. Inline so it renders with zero network. -->
+    <svg viewBox="0 0 300 180" role="img" aria-label="Signal radiating from {{ brand }}">
+      <defs>
+        <linearGradient id="ray" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%"   stop-color="#38F0DC"/>
+          <stop offset="50%"  stop-color="#6FE97F"/>
+          <stop offset="100%" stop-color="#A855F7"/>
+        </linearGradient>
+        <radialGradient id="core">
+          <stop offset="0%"   stop-color="#EDEAF6"/>
+          <stop offset="35%"  stop-color="#38F0DC"/>
+          <stop offset="100%" stop-color="#A855F7" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+      <g id="pulse" fill="none" stroke="url(#ray)" stroke-linecap="round">
+        <!-- concentric shells -->
+        <circle cx="150" cy="150" r="34"  stroke-opacity=".9"  stroke-width="1.5"/>
+        <circle cx="150" cy="150" r="58"  stroke-opacity=".62" stroke-width="1.2"/>
+        <circle cx="150" cy="150" r="84"  stroke-opacity=".4"  stroke-width="1"/>
+        <circle cx="150" cy="150" r="112" stroke-opacity=".22" stroke-width="1"/>
+        <circle cx="150" cy="150" r="142" stroke-opacity=".12" stroke-width="1"/>
+        <!-- twelvefold rays -->
+        <g stroke-opacity=".5" stroke-width="1.1">
+          <path d="M150 150 L150 8"/>
+          <path d="M150 150 L221 27"  transform="rotate(0 150 150)"/>
+          <path d="M150 150 L79 27"/>
+          <path d="M150 150 L273 79"/>
+          <path d="M150 150 L27 79"/>
+          <path d="M150 150 L292 150"/>
+          <path d="M150 150 L8 150"/>
+        </g>
+        <!-- lattice arcs, the net of the field -->
+        <g stroke-opacity=".38" stroke-width="1">
+          <path d="M38 150 A112 112 0 0 1 150 38"/>
+          <path d="M262 150 A112 112 0 0 0 150 38"/>
+          <path d="M66 150 A84 84 0 0 1 150 66"/>
+          <path d="M234 150 A84 84 0 0 0 150 66"/>
+        </g>
+      </g>
+      <circle cx="150" cy="150" r="26" fill="url(#core)" opacity=".95"/>
+    </svg>
+    <h1 class="wordmark"><span class="w">Wee</span><span class="f">Fee</span></h1>
+    <p class="credit">{{ tagline }}</p>
+  </div>
 
-  <form class="plans" method="post" action="/api/checkout">
-    <input type="hidden" name="mac" value="{{ mac or '' }}" />
-    {% for p in plans %}
-    <label class="plan">
-      <input type="radio" name="plan_id" value="{{ p.id }}" {% if loop.index == 2 %}checked{% endif %} required />
-      <span class="plan-top">
-        <span class="plan-name">{{ p.name }}</span>
-        <span class="price">${{ '%.2f'|format(p.price_cents / 100) }}</span>
-      </span>
-      <span class="blurb">{{ p.blurb }}</span>
-      <span class="specs">
-        <span class="spec">{{ (p.minutes // 60) if p.minutes < 2880 else (p.minutes // 1440) }}{{ ' HOURS' if p.minutes < 2880 else ' DAYS' }}</span>
-        <span class="spec">{{ p.down_kbps // 1000 }} MBPS</span>
-        <span class="spec">{{ '%g'|format(p.data_mb / 1000) }} GB CAP</span>
-      </span>
-    </label>
-    {% endfor %}
+  <div class="panel">
+    <div class="panel-head"><span>Choose a pass</span><span>{{ mac or 'no device' }}</span></div>
 
-    <label class="tos">
-      <input type="checkbox" name="accept_tos" value="{{ tos_version }}" required />
-      <span>I agree to the camp WiFi terms: one device per pass, no file-sharing or torrents,
-      and speeds vary with satellite conditions and weather.</span>
-    </label>
+    {% if test_mode %}
+    <p class="notice">Test mode — no card will be charged.</p>
+    {% endif %}
+    {% if cancelled %}
+    <p class="notice warn">Payment cancelled. Nothing was charged.</p>
+    {% endif %}
+    {% if not mac %}
+    <p class="notice warn">This page can't see your device. Rejoin the
+    <strong>{{ brand }}</strong> network and open the sign-in prompt.</p>
+    {% endif %}
 
-    <button class="buy" type="submit" {% if not mac %}disabled{% endif %}>Continue to payment</button>
-    <p class="note">Card, Apple&nbsp;Pay and Google&nbsp;Pay accepted. Payment is handled by Stripe —
-    {{ brand }} never sees your card details.</p>
-  </form>
-
-  <details>
-    <summary>Already bought a pass?</summary>
-    <p class="note" style="text-align:left;margin:.6rem 0 0">
-      If your phone dropped off or you switched devices, enter the code from your receipt.</p>
-    <form method="post" action="/api/voucher">
+    <form method="post" action="/api/checkout">
       <input type="hidden" name="mac" value="{{ mac or '' }}" />
-      <input type="text" name="code" placeholder="ABCD-2345" maxlength="9" required
-             autocapitalize="characters" autocomplete="off" spellcheck="false" />
-      <button type="submit">Restore</button>
-    </form>
-  </details>
 
-  <footer>
-    <p>Trouble connecting? Ask at {{ support }}.</p>
-    <p>{{ tagline }} — <a href="{{ instagram_url }}" rel="noopener">@{{ instagram_handle }}</a></p>
-    {% if mac %}<p class="mac">{{ mac }}</p>{% endif %}
-  </footer>
+      <div class="tiers">
+        {% for p in plans %}
+        <label class="tier">
+          <input type="radio" name="plan_id" value="{{ p.id }}" {% if loop.index == 2 %}checked{% endif %} required />
+          <span class="orb" aria-hidden="true"></span>
+          <span>
+            <span class="tier-name">{{ p.name }}</span>
+            <span class="tier-spec">
+              {{ (p.minutes // 60) ~ ' hr' if p.minutes < 2880 else (p.minutes // 1440) ~ ' days' }}
+              · {{ p.down_kbps // 1000 }} Mbps · {{ '%g'|format(p.data_mb / 1000) }} GB
+            </span>
+          </span>
+          <span class="tier-price">${{ '%.2f'|format(p.price_cents / 100) }}</span>
+        </label>
+        {% endfor %}
+      </div>
+
+      <label class="agree">
+        <input type="checkbox" name="accept_tos" value="{{ tos_version }}" required />
+        <span>One device per pass. No torrents or file sharing. Speeds change with
+        weather and satellite traffic.</span>
+      </label>
+
+      <button class="go" type="submit" {% if not mac %}disabled{% endif %}>Pay and get online</button>
+      <p class="fineprint">
+        Card, Apple Pay, Google Pay · handled by Stripe<br />{{ brand }} never sees your card
+      </p>
+    </form>
+  </div>
+
+  <div class="panel">
+    <details>
+      <summary>Already paid? Enter your code</summary>
+      <form method="post" action="/api/voucher">
+        <input type="hidden" name="mac" value="{{ mac or '' }}" />
+        <input type="text" name="code" placeholder="ABCD-2345" maxlength="9" required
+               autocapitalize="characters" autocomplete="off" spellcheck="false"
+               aria-label="Pass code from your receipt" />
+        <button type="submit">Restore</button>
+      </form>
+    </details>
+  </div>
+
+  <div class="post">
+    <p>Trouble getting on? Ask at {{ support }}.</p>
+    <p><a href="{{ instagram_url }}" rel="noopener">@{{ instagram_handle }}</a></p>
+  </div>
+
 </div>
 </body>
 </html>

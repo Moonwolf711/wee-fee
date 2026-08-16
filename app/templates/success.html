@@ -3,128 +3,198 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#0A0713" />
 <title>{{ brand }} — you're on</title>
 <style>
   :root{
-    --ground:#FBFAF7; --card:#FFFFFF; --ink:#0B2220; --ink-2:#42605C;
-    --rule:#DFE7E4; --accent:#0E9E8C; --accent-deep:#0A6F62; --accent-wash:#E3F6F2;
-    --gram:#D9436F; --gram-deep:#B8305A;
-    --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
-    --mono:ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,monospace;
+    --void:#0A0713; --veil:#140C24; --veil-2:#1B1030;
+    --aqua:#38F0DC; --green:#6FE97F; --violet:#A855F7;
+    --bone:#CFC9BC; --bone-dim:#6E6A61;
+    --text:#EDEAF6; --text-dim:#A79FC0;
+    --sans:ui-rounded,'SF Pro Rounded','Segoe UI Variable Display','Segoe UI',
+           system-ui,-apple-system,sans-serif;
+    --mono:ui-monospace,SFMono-Regular,'SF Mono','Cascadia Mono',Menlo,Consolas,monospace;
   }
   *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
   body{
-    margin:0;background:var(--ground);color:var(--ink);font-family:var(--sans);
-    line-height:1.55;-webkit-font-smoothing:antialiased;
+    margin:0;background:var(--void);color:var(--text);font-family:var(--sans);
+    line-height:1.55;-webkit-font-smoothing:antialiased;overflow-x:hidden;
     padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
   }
-  .wrap{max-width:34rem;margin:0 auto;padding:2.5rem 1.15rem 3rem;text-align:center}
-  .status{
-    display:inline-flex;align-items:center;gap:.55rem;background:var(--accent-wash);
-    color:var(--accent-deep);border-radius:999px;padding:.45rem 1rem;font-weight:700;
-    font-size:.88rem;margin-bottom:1.5rem;
+  body::before{
+    content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+    background:
+      radial-gradient(58rem 40rem at 50% -6rem, rgba(168,85,247,.30), transparent 62%),
+      radial-gradient(40rem 30rem at 50% 2rem, rgba(56,240,220,.16), transparent 60%),
+      radial-gradient(50rem 40rem at 50% 108%, rgba(111,233,127,.12), transparent 62%);
   }
-  .dot{width:.6rem;height:.6rem;border-radius:50%;background:var(--accent);flex:none}
-  .pending .dot{animation:pulse 1.1s ease-in-out infinite}
-  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
-  h1{font-size:clamp(1.9rem,7vw,2.5rem);font-weight:800;letter-spacing:-.03em;margin:0 0 .6rem;line-height:1.15}
-  .sub{color:var(--ink-2);font-size:1.02rem;margin:0 0 2rem}
-  .card{
-    background:var(--card);border:1px solid var(--rule);border-radius:14px;
-    padding:1.25rem;margin:0 0 1.25rem;text-align:left;
-  }
-  .card h2{
+  .field{position:relative;z-index:1;max-width:33rem;margin:0 auto;padding:1.75rem 1rem 3rem;text-align:center}
+
+  .mark svg{width:min(15rem,60vw);height:auto}
+  #pulse{transform-origin:150px 150px;animation:breathe 7s ease-in-out infinite}
+  @keyframes breathe{0%,100%{opacity:.5;transform:scale(.985)}50%{opacity:1;transform:scale(1.015)}}
+  /* when access is confirmed the field stops searching and holds steady */
+  body.locked #pulse{animation:none;opacity:1}
+
+  .state{
+    display:inline-flex;align-items:center;gap:.55rem;margin:.5rem 0 1.25rem;
     font-family:var(--mono);font-size:.68rem;letter-spacing:.16em;text-transform:uppercase;
-    color:var(--ink-2);margin:0 0 .7rem;font-weight:600;
+    padding:.4rem .9rem;border-radius:999px;
+    border:1px solid rgba(207,201,188,.25);color:var(--text-dim);
   }
-  .row{display:flex;justify-content:space-between;gap:1rem;padding:.4rem 0;font-size:.95rem}
-  .row + .row{border-top:1px solid var(--rule)}
-  .row b{font-variant-numeric:tabular-nums}
-  .voucher{
-    font-family:var(--mono);font-size:1.55rem;font-weight:700;letter-spacing:.08em;
-    text-align:center;background:var(--accent-wash);color:var(--accent-deep);
-    border-radius:10px;padding:.75rem;margin:.4rem 0 .6rem;
+  .state .dot{width:.5rem;height:.5rem;border-radius:50%;background:var(--violet);flex:none;
+    animation:blink 1.2s ease-in-out infinite}
+  @keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+  body.locked .state{border-color:var(--aqua);color:var(--aqua)}
+  body.locked .state .dot{background:var(--aqua);animation:none}
+
+  h1{font-size:clamp(1.85rem,7vw,2.4rem);font-weight:800;letter-spacing:-.035em;
+     margin:0 0 .5rem;line-height:1.1}
+  .sub{color:var(--text-dim);font-size:1rem;margin:0 0 1.75rem}
+
+  .panel{
+    background:linear-gradient(180deg,rgba(27,16,48,.86),rgba(20,12,36,.86));
+    border:1px solid rgba(207,201,188,.22);border-radius:14px;
+    padding:1.1rem;margin:0 0 1rem;text-align:left;backdrop-filter:blur(6px);
   }
+  .panel h2{
+    font-family:var(--mono);font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;
+    color:var(--text-dim);margin:0 0 .75rem;font-weight:600;
+  }
+  .row{display:flex;justify-content:space-between;gap:1rem;padding:.42rem 0;font-size:.95rem}
+  .row + .row{border-top:1px solid rgba(207,201,188,.12)}
+  .row b{font-family:var(--mono);font-variant-numeric:tabular-nums;font-weight:700}
+
+  .code{
+    font-family:var(--mono);font-size:1.6rem;font-weight:700;letter-spacing:.16em;
+    text-align:center;padding:.85rem;border-radius:11px;margin:.3rem 0 .6rem;
+    border:1px dashed rgba(56,240,220,.5);background:rgba(56,240,220,.07);
+    background-image:linear-gradient(96deg,var(--aqua),var(--green) 50%,#C9A8FF);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .hint{font-size:.8rem;color:var(--text-dim);margin:0;line-height:1.55}
+
   .gram{
-    display:block;background:var(--gram);color:#fff;text-decoration:none;border-radius:12px;
-    padding:1.05rem 1rem;font-weight:750;font-size:1.05rem;transition:background .12s;
+    display:block;border-radius:12px;padding:1.05rem 1rem;text-decoration:none;
+    font-weight:800;font-size:1.05rem;color:#07121A;
+    background:linear-gradient(96deg,var(--aqua),var(--green) 52%,#C9A8FF);
+    box-shadow:0 0 30px -8px rgba(56,240,220,.7);transition:filter .15s,transform .1s;
   }
-  .gram:hover{background:var(--gram-deep)}
-  .gram:focus-visible{outline:3px solid var(--gram-deep);outline-offset:3px}
-  .gram small{display:block;font-weight:500;font-size:.82rem;opacity:.92;margin-top:.15rem}
-  .note{font-size:.82rem;color:var(--ink-2);margin:1.4rem 0 0;line-height:1.6}
-  footer{margin-top:2rem;font-size:.78rem;color:var(--ink-2)}
-  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+  .gram:hover{filter:brightness(1.08)}
+  .gram:active{transform:translateY(1px)}
+  .gram:focus-visible{outline:3px solid var(--violet);outline-offset:3px}
+  .gram small{display:block;font-weight:500;font-size:.8rem;opacity:.85;margin-top:.15rem}
+
+  .note{font-size:.78rem;color:var(--text-dim);margin:1.3rem 0 0;line-height:1.65}
+  footer{
+    margin-top:1.75rem;font-family:var(--mono);font-size:.6rem;letter-spacing:.24em;
+    text-transform:uppercase;color:var(--bone-dim);
+  }
+  @media (prefers-reduced-motion:reduce){
+    #pulse,.state .dot{animation:none}
+    *{transition:none!important}
+  }
 </style>
 </head>
 <body>
-<div class="wrap">
-  <div class="status pending" id="status"><span class="dot"></span><span id="statusText">Turning on your connection…</span></div>
+<div class="field">
 
-  <h1 id="headline">Payment received</h1>
-  <p class="sub" id="sub">Hang tight for a few seconds while we open up your access.</p>
-
-  <div class="card">
-    <h2>Your pass</h2>
-    <div class="row"><span>{{ plan.name or 'Pass' }}</span><b>${{ '%.2f'|format((session.amount_cents or 0) / 100) }}</b></div>
-    {% if plan.minutes %}<div class="row"><span>Good for</span><b>{{ (plan.minutes // 60) if plan.minutes < 2880 else (plan.minutes // 1440) }}{{ ' hours' if plan.minutes < 2880 else ' days' }}</b></div>{% endif %}
-    {% if plan.down_kbps %}<div class="row"><span>Speed</span><b>up to {{ plan.down_kbps // 1000 }} Mbps</b></div>{% endif %}
-    {% if plan.data_mb %}<div class="row"><span>Data included</span><b>{{ '%g'|format(plan.data_mb / 1000) }} GB</b></div>{% endif %}
+  <div class="mark">
+    <svg viewBox="0 0 300 300" role="img" aria-label="Signal field">
+      <defs>
+        <linearGradient id="ray" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#38F0DC"/><stop offset="50%" stop-color="#6FE97F"/>
+          <stop offset="100%" stop-color="#A855F7"/>
+        </linearGradient>
+        <radialGradient id="core">
+          <stop offset="0%" stop-color="#EDEAF6"/><stop offset="35%" stop-color="#38F0DC"/>
+          <stop offset="100%" stop-color="#A855F7" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+      <g id="pulse" fill="none" stroke="url(#ray)" stroke-linecap="round">
+        <circle cx="150" cy="150" r="40"  stroke-opacity=".9"  stroke-width="1.6"/>
+        <circle cx="150" cy="150" r="72"  stroke-opacity=".6"  stroke-width="1.2"/>
+        <circle cx="150" cy="150" r="104" stroke-opacity=".38" stroke-width="1"/>
+        <circle cx="150" cy="150" r="136" stroke-opacity=".2"  stroke-width="1"/>
+        <g stroke-opacity=".45" stroke-width="1.1">
+          <path d="M150 14 L150 286"/><path d="M14 150 L286 150"/>
+          <path d="M54 54 L246 246"/><path d="M246 54 L54 246"/>
+        </g>
+        <g stroke-opacity=".35" stroke-width="1">
+          <path d="M46 150 A104 104 0 0 1 150 46"/>
+          <path d="M254 150 A104 104 0 0 0 150 46"/>
+          <path d="M46 150 A104 104 0 0 0 150 254"/>
+          <path d="M254 150 A104 104 0 0 1 150 254"/>
+        </g>
+      </g>
+      <circle cx="150" cy="150" r="30" fill="url(#core)" opacity=".95"/>
+    </svg>
   </div>
 
-  <div class="card">
-    <h2>Save this code</h2>
-    <div class="voucher">{{ voucher }}</div>
-    <p style="margin:0;font-size:.85rem;color:var(--ink-2)">
-      If your phone drops off or you switch devices, enter this on the sign-in page to get back
-      online. Screenshot it — you'll need internet to look it up otherwise.</p>
+  <div class="state" id="state"><span class="dot"></span><span id="stateText">Opening your access</span></div>
+
+  <h1 id="headline">Payment received</h1>
+  <p class="sub" id="sub">Give it a few seconds while the network lets your device through.</p>
+
+  <div class="panel">
+    <h2>Your pass</h2>
+    <div class="row"><span>{{ plan.name or 'Pass' }}</span><b>${{ '%.2f'|format((session.amount_cents or 0) / 100) }}</b></div>
+    {% if plan.minutes %}<div class="row"><span>Good for</span><b>{{ (plan.minutes // 60) ~ ' hours' if plan.minutes < 2880 else (plan.minutes // 1440) ~ ' days' }}</b></div>{% endif %}
+    {% if plan.down_kbps %}<div class="row"><span>Speed</span><b>{{ plan.down_kbps // 1000 }} Mbps</b></div>{% endif %}
+    {% if plan.data_mb %}<div class="row"><span>Data</span><b>{{ '%g'|format(plan.data_mb / 1000) }} GB</b></div>{% endif %}
+  </div>
+
+  <div class="panel">
+    <h2>Screenshot this code</h2>
+    <div class="code">{{ voucher }}</div>
+    <p class="hint">If your phone drops off or you switch devices, this code puts you back
+    online. You'll need internet to look it up later — so save it now.</p>
   </div>
 
   <a class="gram" href="{{ instagram_url }}" rel="noopener" target="_blank">
     Follow @{{ instagram_handle }}
-    <small>{{ tagline }} — see what we're up to</small>
+    <small>{{ tagline }}</small>
   </a>
 
-  <p class="note">Your pass covers <strong>this device only</strong>. Speeds vary with satellite
-  conditions and weather. Questions? Ask at {{ support }}.</p>
+  <p class="note">Your pass covers <strong>this device only</strong>. Speeds change with
+  weather and satellite traffic. Trouble? Ask at {{ support }}.</p>
 
-  <footer>{{ brand }} — {{ tagline }}</footer>
+  <footer>{{ brand }}</footer>
 </div>
 
 <script>
-  // The Stripe webhook is the source of truth, and it can land a moment after
-  // the guest is redirected here. Poll until access is actually open.
+  // The Stripe webhook is the source of truth and can land a moment after the
+  // redirect, so the page waits for real confirmation instead of assuming it.
   (function () {
     var wf = {{ session.id | tojson }};
-    var statusEl = document.getElementById('status');
-    var textEl = document.getElementById('statusText');
+    var body = document.body;
+    var stateText = document.getElementById('stateText');
     var headline = document.getElementById('headline');
     var sub = document.getElementById('sub');
     var tries = 0;
 
-    function done() {
-      statusEl.classList.remove('pending');
-      textEl.textContent = "You're online";
+    function online() {
+      body.classList.add('locked');
+      stateText.textContent = "You're online";
       headline.textContent = "You're connected";
-      sub.textContent = 'Go ahead and use the internet — this page can be closed.';
+      sub.textContent = 'Go ahead and use the internet. You can close this page.';
     }
-
-    function stalled() {
-      textEl.textContent = 'Still confirming…';
+    function slow() {
+      stateText.textContent = 'Still confirming';
       sub.textContent = 'Your payment went through. If you are not online in a minute, '
-        + 'rejoin the WiFi, or show your code at the office.';
+        + 'rejoin the network or show your code at ' + {{ support | tojson }} + '.';
     }
-
     function poll() {
       fetch('/api/session-status?wf=' + encodeURIComponent(wf))
         .then(function (r) { return r.json(); })
         .then(function (d) {
-          if (d.online) { done(); return; }
-          if (++tries > 20) { stalled(); return; }
+          if (d.online) return online();
+          if (++tries > 20) return slow();
           setTimeout(poll, 1500);
         })
         .catch(function () {
-          if (++tries > 20) { stalled(); return; }
+          if (++tries > 20) return slow();
           setTimeout(poll, 2000);
         });
     }
