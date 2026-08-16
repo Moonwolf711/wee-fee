@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>{{ brand }} — camp WiFi</title>
+<style>
+  :root{
+    --ground:#FBFAF7; --card:#FFFFFF; --ink:#0B2220; --ink-2:#42605C;
+    --rule:#DFE7E4; --accent:#0E9E8C; --accent-deep:#0A6F62; --accent-wash:#E3F6F2;
+    --gram:#D9436F; --warn:#8A5A00; --warn-bg:#FFF4DC;
+    --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+    --mono:ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;background:var(--ground);color:var(--ink);font-family:var(--sans);
+    line-height:1.55;-webkit-font-smoothing:antialiased;
+    padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
+  }
+  .wrap{max-width:34rem;margin:0 auto;padding:2rem 1.15rem 3rem}
+  header{text-align:center;margin-bottom:1.75rem}
+  .mark{
+    display:inline-flex;align-items:baseline;gap:.1em;
+    font-size:clamp(2.6rem,12vw,3.6rem);font-weight:800;letter-spacing:-.035em;
+    line-height:1;margin:0;
+  }
+  .mark .a{color:var(--ink)} .mark .b{color:var(--accent)}
+  .bars{display:inline-flex;align-items:flex-end;gap:3px;margin-left:.45rem;height:.85em}
+  .bars i{display:block;width:6px;border-radius:2px;background:var(--accent);opacity:.28}
+  .bars i:nth-child(1){height:32%} .bars i:nth-child(2){height:58%}
+  .bars i:nth-child(3){height:80%} .bars i:nth-child(4){height:100%}
+  .bars i.on{opacity:1}
+  .tagline{
+    font-family:var(--mono);font-size:.7rem;letter-spacing:.19em;text-transform:uppercase;
+    color:var(--ink-2);margin:.85rem 0 0;
+  }
+  .lede{margin:1.25rem 0 0;color:var(--ink-2);font-size:1.02rem}
+  .banner{
+    background:var(--warn-bg);color:var(--warn);border-radius:10px;padding:.7rem .9rem;
+    font-size:.82rem;margin:0 0 1.25rem;text-align:center;font-weight:600;
+  }
+  .err{background:#FDECEC;color:#96261D}
+  form.plans{display:flex;flex-direction:column;gap:.85rem;margin:0 0 1.5rem}
+  .plan{
+    display:block;background:var(--card);border:2px solid var(--rule);border-radius:14px;
+    padding:1rem 1.1rem;cursor:pointer;transition:border-color .12s,background .12s;
+  }
+  .plan:hover{border-color:var(--accent)}
+  .plan input{position:absolute;opacity:0;pointer-events:none}
+  .plan:has(input:checked){border-color:var(--accent);background:var(--accent-wash)}
+  .plan:has(input:focus-visible){outline:3px solid var(--accent-deep);outline-offset:2px}
+  .plan-top{display:flex;justify-content:space-between;align-items:baseline;gap:1rem}
+  .plan-name{font-weight:750;font-size:1.15rem}
+  .price{font-weight:800;font-size:1.35rem;font-variant-numeric:tabular-nums;color:var(--accent-deep)}
+  .blurb{color:var(--ink-2);font-size:.92rem;margin:.15rem 0 .55rem}
+  .specs{display:flex;flex-wrap:wrap;gap:.4rem}
+  .spec{
+    font-family:var(--mono);font-size:.68rem;letter-spacing:.05em;background:var(--ground);
+    border:1px solid var(--rule);border-radius:5px;padding:.2em .5em;color:var(--ink-2);
+  }
+  .tos{display:flex;gap:.65rem;align-items:flex-start;font-size:.86rem;color:var(--ink-2);margin:0 0 1.1rem}
+  .tos input{width:1.3rem;height:1.3rem;flex:none;margin-top:.1rem;accent-color:var(--accent)}
+  button.buy{
+    width:100%;border:none;border-radius:12px;background:var(--accent);color:#fff;
+    font-family:inherit;font-size:1.1rem;font-weight:750;padding:1.05rem 1rem;cursor:pointer;
+    transition:background .12s;
+  }
+  button.buy:hover{background:var(--accent-deep)}
+  button.buy:focus-visible{outline:3px solid var(--accent-deep);outline-offset:3px}
+  button.buy:disabled{background:#B9C7C4;cursor:not-allowed}
+  .note{font-size:.8rem;color:var(--ink-2);text-align:center;margin:.85rem 0 0}
+  details{margin-top:2rem;border-top:1px solid var(--rule);padding-top:1.25rem}
+  summary{cursor:pointer;font-weight:650;font-size:.95rem}
+  details form{display:flex;gap:.5rem;margin-top:.85rem}
+  details input[type=text]{
+    flex:1;padding:.75rem .85rem;border:2px solid var(--rule);border-radius:10px;
+    font-family:var(--mono);font-size:1rem;text-transform:uppercase;background:var(--card);color:var(--ink);
+  }
+  details button{
+    border:none;background:var(--ink);color:#fff;border-radius:10px;padding:0 1.1rem;
+    font-weight:650;cursor:pointer;font-family:inherit;
+  }
+  footer{margin-top:2.5rem;text-align:center;font-size:.78rem;color:var(--ink-2);line-height:1.7}
+  footer a{color:var(--gram);font-weight:650;text-decoration:none}
+  .mac{font-family:var(--mono);font-size:.7rem;color:#93A5A2;margin-top:.4rem}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1 class="mark"><span class="a">Wee</span><span class="b">Fee</span><span class="bars"
+      aria-hidden="true"><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span></h1>
+    <p class="tagline">{{ tagline }}</p>
+    <p class="lede">Get online at camp. Pick a pass, pay, and you're connected in about a minute.</p>
+  </header>
+
+  {% if test_mode %}
+  <p class="banner">Test mode — no real card will be charged.</p>
+  {% endif %}
+  {% if cancelled %}
+  <p class="banner">Payment cancelled. Nothing was charged — pick a pass to try again.</p>
+  {% endif %}
+  {% if not mac %}
+  <p class="banner err">We can't see your device yet. Disconnect from the WiFi, rejoin
+  <strong>{{ brand }}</strong>, and open this page again from the sign-in prompt.</p>
+  {% endif %}
+
+  <form class="plans" method="post" action="/api/checkout">
+    <input type="hidden" name="mac" value="{{ mac or '' }}" />
+    {% for p in plans %}
+    <label class="plan">
+      <input type="radio" name="plan_id" value="{{ p.id }}" {% if loop.index == 2 %}checked{% endif %} required />
+      <span class="plan-top">
+        <span class="plan-name">{{ p.name }}</span>
+        <span class="price">${{ '%.2f'|format(p.price_cents / 100) }}</span>
+      </span>
+      <span class="blurb">{{ p.blurb }}</span>
+      <span class="specs">
+        <span class="spec">{{ (p.minutes // 60) if p.minutes < 2880 else (p.minutes // 1440) }}{{ ' HOURS' if p.minutes < 2880 else ' DAYS' }}</span>
+        <span class="spec">{{ p.down_kbps // 1000 }} MBPS</span>
+        <span class="spec">{{ '%g'|format(p.data_mb / 1000) }} GB CAP</span>
+      </span>
+    </label>
+    {% endfor %}
+
+    <label class="tos">
+      <input type="checkbox" name="accept_tos" value="{{ tos_version }}" required />
+      <span>I agree to the camp WiFi terms: one device per pass, no file-sharing or torrents,
+      and speeds vary with satellite conditions and weather.</span>
+    </label>
+
+    <button class="buy" type="submit" {% if not mac %}disabled{% endif %}>Continue to payment</button>
+    <p class="note">Card, Apple&nbsp;Pay and Google&nbsp;Pay accepted. Payment is handled by Stripe —
+    {{ brand }} never sees your card details.</p>
+  </form>
+
+  <details>
+    <summary>Already bought a pass?</summary>
+    <p class="note" style="text-align:left;margin:.6rem 0 0">
+      If your phone dropped off or you switched devices, enter the code from your receipt.</p>
+    <form method="post" action="/api/voucher">
+      <input type="hidden" name="mac" value="{{ mac or '' }}" />
+      <input type="text" name="code" placeholder="ABCD-2345" maxlength="9" required
+             autocapitalize="characters" autocomplete="off" spellcheck="false" />
+      <button type="submit">Restore</button>
+    </form>
+  </details>
+
+  <footer>
+    <p>Trouble connecting? Ask at {{ support }}.</p>
+    <p>{{ tagline }} — <a href="{{ instagram_url }}" rel="noopener">@{{ instagram_handle }}</a></p>
+    {% if mac %}<p class="mac">{{ mac }}</p>{% endif %}
+  </footer>
+</div>
+</body>
+</html>

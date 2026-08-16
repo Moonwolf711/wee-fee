@@ -1,0 +1,68 @@
+# WeeFee — Render Blueprint
+#
+# A persistent disk is REQUIRED, not optional. Render's filesystem is ephemeral,
+# so without it the SQLite payment ledger is destroyed on every deploy — and a
+# chargeback can land 120 days after the guest drove away. Disks need a paid
+# instance (starter), which is why this is not on the free plan.
+#
+# A disk also pins the service to one instance and disables zero-downtime
+# deploys. That's the correct trade here: this workload is tiny, and losing
+# payment records is unrecoverable.
+
+services:
+  - type: web
+    name: weefee
+    runtime: python
+    plan: starter
+    region: oregon
+    branch: main
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /healthz
+    autoDeploy: false
+
+    disk:
+      name: weefee-data
+      mountPath: /var/data
+      sizeGB: 1
+
+    envVars:
+      # Ledger lives on the persistent disk, not the ephemeral filesystem.
+      - key: WEEFEE_DATA_DIR
+        value: /var/data
+
+      # Secrets — set these in the Render dashboard, never in this file.
+      # sync:false means "prompt me, don't store it in git".
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: STRIPE_WEBHOOK_SECRET
+        sync: false
+
+      # Shared secret the on-site gateway agent presents when polling.
+      - key: WEEFEE_GATEWAY_TOKEN
+        generateValue: true
+
+      # Must match the service's real public URL, or Stripe redirects break.
+      - key: WEEFEE_BASE_URL
+        sync: false
+
+      - key: WEEFEE_BRAND
+        value: WeeFee
+      - key: WEEFEE_TAGLINE
+        value: Brought to you by Fuq Ice
+      - key: WEEFEE_INSTAGRAM
+        value: fuqiceoffical
+      - key: WEEFEE_SUPPORT
+        value: the camp office
+
+      - key: WEEFEE_GRACE_MINUTES
+        value: "10"
+      - key: WEEFEE_GRACE_MB
+        value: "25"
+      - key: WEEFEE_GRACE_KBPS
+        value: "1000"
+      - key: WEEFEE_GRACE_COOLDOWN
+        value: "60"
+
+      - key: PYTHON_VERSION
+        value: "3.13.13"
