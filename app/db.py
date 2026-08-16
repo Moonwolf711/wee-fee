@@ -97,11 +97,13 @@ CREATE TABLE IF NOT EXISTS usage (
 """
 
 DEFAULT_PLANS = [
-    # id,        name,        blurb,                                   cents, min,  MB,   down,  up,  order
-    ("chat",  "Chat Pass",  "Messaging, email, maps. No video.",          300,  1440,  500,  3000, 1000, 1),
-    ("day",   "Day Pass",   "Everything, one day. Streaming is fine.",    800,  1440, 2000,  6000, 2000, 2),
-    ("week",  "Week Pass",  "Seven days. Best value for long stays.",    2500, 10080, 8000,  8000, 2000, 3),
+    # id,      name,        blurb,                                  cents,  min,   MB,   down,   up,  order
+    ("hour", "Hour Pass", "One hour online. Enough to catch up.",     500,    60,  5000, 10000, 3000, 1),
+    ("day",  "Day Pass",  "A full day at full speed.",               2500,  1440, 20000, 10000, 3000, 2),
 ]
+# Data caps are not optional. Starlink Local Priority is metered at roughly
+# $0.25/GB, so an uncapped pass can cost more in data than it earns: 10 Mbps
+# sustained for 24h is ~108 GB, about $27 against a $25 sale.
 
 
 def connect() -> sqlite3.Connection:
@@ -121,15 +123,32 @@ def db():
 
 
 def init() -> None:
+    """Create the schema and sync the plan catalogue to DEFAULT_PLANS.
+
+    This upserts rather than insert-if-missing: an earlier version only
+    inserted new ids, so changing a price in code silently did nothing to any
+    database that had already been seeded. Plans no longer listed are
+    deactivated, never deleted — old sessions still reference them for
+    receipts and dispute evidence.
+    """
     with db() as conn:
         conn.executescript(SCHEMA)
-        existing = {r["id"] for r in conn.execute("SELECT id FROM plans")}
         for p in DEFAULT_PLANS:
-            if p[0] not in existing:
-                conn.execute(
-                    "INSERT INTO plans (id,name,blurb,price_cents,minutes,data_mb,"
-                    "down_kbps,up_kbps,sort_order) VALUES (?,?,?,?,?,?,?,?,?)", p
-                )
+            conn.execute(
+                "INSERT INTO plans (id,name,blurb,price_cents,minutes,data_mb,"
+                "down_kbps,up_kbps,sort_order,active) VALUES (?,?,?,?,?,?,?,?,?,1) "
+                "ON CONFLICT(id) DO UPDATE SET "
+                "  name=excluded.name, blurb=excluded.blurb,"
+                "  price_cents=excluded.price_cents, minutes=excluded.minutes,"
+                "  data_mb=excluded.data_mb, down_kbps=excluded.down_kbps,"
+                "  up_kbps=excluded.up_kbps, sort_order=excluded.sort_order, active=1",
+                p,
+            )
+        keep = [p[0] for p in DEFAULT_PLANS]
+        conn.execute(
+            f"UPDATE plans SET active=0 WHERE id NOT IN ({','.join('?' for _ in keep)})",
+            keep,
+        )
 
 
 def now() -> int:
